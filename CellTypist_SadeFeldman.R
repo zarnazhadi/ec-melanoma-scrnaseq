@@ -67,7 +67,7 @@ scaled_sample = ScaleData(sample, features = all.genes)
 scaled_sample <- RunPCA(scaled_sample)
 saveRDS(scaled_sample, "sample_scaled.RDS")
 
-tiff("elbow_plot.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "2.elbow_plot.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 ElbowPlot(scaled_sample, ndims = 30)
 
