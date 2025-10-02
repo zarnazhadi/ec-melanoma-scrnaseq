@@ -1,0 +1,53 @@
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+.RDataTmp
+
+# User-specific files
+.Rproj.user/
+
+# RStudio project files
+*.Rproj
+
+# R environment files
+.Renviron
+.Rprofile
+
+# Data / cache / temporary files
+*.csv
+*.tsv
+*.rds
+*.RData
+*.feather
+*.fst
+*.parquet
+*.h5
+*.db
+*.sqlite
+*.sav
+
+# Logs
+*.log
+
+# Compiled code
+*.o
+*.so
+*.dll
+
+# Python virtual environments
+venv/
+__pycache__/
+*.pyc
+
+# Quarto / RMarkdown caches
+*_cache/
+*.knit.md
+*.utf8.md
+
+# MacOS / Windows system files
+.DS_Store
+Thumbs.db
+
