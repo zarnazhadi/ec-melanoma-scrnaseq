@@ -20,6 +20,8 @@ patients = c("P01", "P02", "P03",
              "P31", "P33", "P35")
 
 r_path = "/Users/bs21zh/OneDrive - University of Leeds/Sade Feldman et al/FILTERED/"
+outdir = "/Users/bs21zh/OneDrive - University of Leeds/Sade Feldman et al/FIGURES"
+
 setwd(r_path)
 
 sample_list <- list()
