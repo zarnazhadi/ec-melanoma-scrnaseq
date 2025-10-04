@@ -2,6 +2,7 @@ library("dplyr")
 library("Seurat")
 library("SeuratObject")
 library(ggplot2)
+library(patchwork)
 
 # patients = c("P01", "P02", "P03", 
 #              "P04", "P06", "P11", 
@@ -73,9 +74,9 @@ ElbowPlot(scaled_sample, ndims = 30)
 
 dev.off()
 
-tiff("pca_sample_origin.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "3.pca_sample_origin.tiff"), units = "in", width = 10, height = 7, res = 900)
 
-DimPlot(scaled_sample, reduction = "pca") 
+DimPlot(scaled_sample, reduction = "pca") + labs(subtitle = paste0('N = ', dim(scaled_sample)[2]))
 
 dev.off()
 
@@ -84,7 +85,7 @@ scaled_umap = scaled_sample %>%
   FindClusters(resolution = 0.8) %>% 
   RunUMAP(dims = 1:7)
 
-tiff("umap_unannotated.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "4.umap_unannotated.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 d1 = DimPlot(scaled_umap, label.size = 4, repel = T, label = T)
 d2 = DimPlot(scaled_umap, group.by = "orig.ident", label.size = 4) + ggtitle("Grouped by Sample ID")
@@ -111,7 +112,7 @@ all(annot$CellID == rownames(scaled_umap@meta.data))
 scaled_umap@meta.data = cbind(scaled_umap@meta.data, annot$majority_voting)
 colnames(scaled_umap@meta.data)[7] = "majority_voting"
 
-tiff("umap_annotated.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "5.umap_annotated.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 DimPlot(scaled_umap, reduction = "umap", group.by = "majority_voting", label = T, repel = T) + 
   ggtitle("UMAP grouped by CellTypist Annotation")
@@ -150,7 +151,7 @@ p4 <- DimPlot(scaled_umap, reduction = "pca",
 combined_plot <- p1 + p2 + p3 + p4 + plot_layout(ncol = 2)  # Arrange in 2x2 grid
 
 
-tiff("pca_NK.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path("6.pca_NK.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 combined_plot
 
@@ -188,13 +189,13 @@ f2 = FeaturePlot(scaled_umap, pt.size = 0.1,
 
 combined_plot <- f1 + f2 + plot_layout(ncol = 2)
 
-tiff("umap_signature.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "7.umap_signature.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 print(combined_plot)
 
 dev.off()
 
-tiff("dotplot_signature.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "8.dotplot_signature.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 DotPlot(scaled_umap,
         features = c(unlist(pos_sig), unlist(neg_sig)),
@@ -205,7 +206,7 @@ DotPlot(scaled_umap,
 
 dev.off()
 
-tiff("featureplot_signature.tiff", units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "9.featureplot_signature.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 FeaturePlot(scaled_umap, features = unlist(c(pos_sig, neg_sig)), cols = c("lightgrey", "red3"))
 
@@ -216,7 +217,7 @@ dev.off()
 library(RColorBrewer)
 mycolors2 = c("#66C2A5", "#FC8D62", rep("grey", 10),  rep("#8DA0CB", 2))
 
-tiff("scatter.tiff", units = "in", width = 13, height = 7, res = 900)
+tiff(file.path(outdir, "10.scatter.tiff"), units = "in", width = 13, height = 7, res = 900)
 ggplot(scaled_umap@meta.data, aes(x = Negative_Signature1, y = Positive_Signature1, color = majority_voting)) + 
   geom_point() + scale_color_manual(values = mycolors2) +
   labs(y = "Positive Signature Score", x = "Negative Signature Score", color = "CellTypist Annotation") +
@@ -247,7 +248,7 @@ venn.diagram(
   category.names = c("CD16+ NK Cells" ,
                      "Positive Score > 0\nNegative Score < 0",
                      "CD16- NK Cells"),
-  filename = 'venn1.png',
+  filename = file.path(outdir, 'venn1.png'),
   output = T,
   
   # Output features
@@ -282,7 +283,7 @@ venn.diagram(
     "CD16+ NK Cells" ,
     "Positive Score > 0.5\nNegative Score < 0",
     "CD16- NK Cells"
-  ), filename = 'venn3.png',
+  ), filename = file.path(outdir,'venn3.png'),
   output = T,
   
   # Output features
@@ -318,7 +319,7 @@ venn.diagram(
     "CD16+ NK Cells" ,
     "Positive Score > 0.5\nNegative Score < 1.5",
     "CD16- NK Cells"
-  ), filename = 'venn2.png',
+  ), filename = file.path(outdir, 'venn2.png'),
   output = T,
   
   # Output features
