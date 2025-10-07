@@ -67,16 +67,12 @@ scaled_sample = ScaleData(sample, features = all.genes)
 # pca
 scaled_sample <- RunPCA(scaled_sample)
 saveRDS(scaled_sample, "sample_scaled.RDS")
+scaled_sample = readRDS("sample_scaled.RDS")
 
-tiff(file.path(outdir, "2.elbow_plot.tiff"), units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "2.elbow_plot_pca_combined.tiff"), units = "in", width = 10, height = 7, res = 900)
 
-ElbowPlot(scaled_sample, ndims = 30)
-
-dev.off()
-
-tiff(file.path(outdir, "3.pca_sample_origin.tiff"), units = "in", width = 10, height = 7, res = 900)
-
-DimPlot(scaled_sample, reduction = "pca") + labs(subtitle = paste0('N = ', dim(scaled_sample)[2]))
+ElbowPlot(scaled_sample, ndims = 30) + 
+  (DimPlot(scaled_sample, reduction = "pca") + labs(subtitle = paste0('N = ', dim(scaled_sample)[2])))
 
 dev.off()
 
@@ -85,7 +81,7 @@ scaled_umap = scaled_sample %>%
   FindClusters(resolution = 0.8) %>% 
   RunUMAP(dims = 1:7)
 
-tiff(file.path(outdir, "4.umap_unannotated.tiff"), units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "3.umap_unannotated.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 d1 = DimPlot(scaled_umap, label.size = 4, repel = T, label = T)
 d2 = DimPlot(scaled_umap, group.by = "orig.ident", label.size = 4) + ggtitle("Grouped by Sample ID")
@@ -112,10 +108,12 @@ all(annot$CellID == rownames(scaled_umap@meta.data))
 scaled_umap@meta.data = cbind(scaled_umap@meta.data, annot$majority_voting)
 colnames(scaled_umap@meta.data)[7] = "majority_voting"
 
-tiff(file.path(outdir, "5.umap_annotated.tiff"), units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "4.umap_annotated.tiff"), units = "in", width = 12, height = 8, res = 900)
 
-DimPlot(scaled_umap, reduction = "umap", group.by = "majority_voting", label = T, repel = T) + 
+d3 = DimPlot(scaled_umap, reduction = "umap", group.by = "majority_voting", label = T, repel = T) + 
   ggtitle("UMAP grouped by CellTypist Annotation")
+
+d2 + d3
 
 dev.off()
 
@@ -128,21 +126,21 @@ cd16_neg_nk_cells <- rownames(scaled_umap@meta.data[scaled_umap@meta.data$majori
 cd16_pos_nk_cells <- rownames(scaled_umap@meta.data[scaled_umap@meta.data$majority_voting == "CD16+ NK cells",])
 
 # Create individual DimPlots
-p1 <- DimPlot(scaled_umap, reduction = "pca", 
+p1 <- DimPlot(scaled_umap, reduction = "umap", 
               cells.highlight = c(nk_cells, cd16_neg_nk_cells, cd16_pos_nk_cells)) + 
   NoLegend() + ggtitle("CD16+ NK cells, CD16- NK cells and NK cells")
 
-p2 <- DimPlot(scaled_umap, reduction = "pca", 
+p2 <- DimPlot(scaled_umap, reduction = "umap", 
               cells.highlight = nk_cells) + 
   labs(subtitle = paste0("n = ", length(nk_cells), " (", signif(length(nk_cells)/all_cells *100, digits = 3), "%)")) +
   NoLegend() + ggtitle("NK Cells")
 
-p3 <- DimPlot(scaled_umap, reduction = "pca", 
+p3 <- DimPlot(scaled_umap, reduction = "umap", 
               cells.highlight = cd16_neg_nk_cells) + 
   labs(subtitle = paste0("n = ", length(cd16_neg_nk_cells), " (", signif(length(cd16_neg_nk_cells)/all_cells *100, digits = 3), "%)")) +
   NoLegend() + ggtitle("CD16- NK cells")
 
-p4 <- DimPlot(scaled_umap, reduction = "pca", 
+p4 <- DimPlot(scaled_umap, reduction = "umap", 
               cells.highlight = cd16_pos_nk_cells) +
   labs(subtitle = paste0("n = ", length(cd16_pos_nk_cells), " (", signif(length(cd16_pos_nk_cells)/all_cells *100, digits = 3), "%)")) +
   NoLegend() + ggtitle("CD16+ NK cells")
@@ -151,12 +149,11 @@ p4 <- DimPlot(scaled_umap, reduction = "pca",
 combined_plot <- p1 + p2 + p3 + p4 + plot_layout(ncol = 2)  # Arrange in 2x2 grid
 
 
-tiff(file.path("6.pca_NK.tiff"), units = "in", width = 10, height = 7, res = 900)
+tiff(file.path(outdir, "6.umap_NK.tiff"), units = "in", width = 10, height = 7, res = 900)
 
 combined_plot
 
 dev.off()
-
 
 # Feature Plots
 pos_sig = list(c("NCR1", "NCAM1", "GNLY", "FCGR3A", "KLRB1"))
